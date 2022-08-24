@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XOX</title>
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        h3 {
+            margin: 5px 0;
+        }
+
+        .xox-area {
+            width: 300px;
+            height: 300px;
+            border: 1px solid black;
+            user-select: none;
+        }
+
+        .xox-block {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+        }
+
+        .xox-block:not(:last-child) {
+            border-bottom: 1px solid black;
+        }
+
+        .xox-box {
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .item {
+            font-weight: bold;
+        }
+
+        .item-x {
+            color: red;
+        }
+
+        .item-o {
+            color: blue;
+        }
+
+
+        .xox-box:not(:last-child) {
+            border-right: 1px solid black;
+        }
+    </style>
+</head>
+
+<body>
+    <h3 class="result"></h3>
+    <div class="xox-area">
+        <div class="xox-block">
+            <div class="xox-box"></div>
+            <div class="xox-box"></div>
+            <div class="xox-box"></div>
+        </div>
+        <div class="xox-block">
+            <div class="xox-box"></div>
+            <div class="xox-box"></div>
+            <div class="xox-box"></div>
+        </div>
+        <div class="xox-block">
+            <div class="xox-box"></div>
+            <div class="xox-box"></div>
+            <div class="xox-box"></div>
+        </div>
+    </div>
+    <button class="new-game" style="margin-top: 10px;">Yeni Oyun</button>
+    <h2 class="playerturn"></h2>
+    <script>
+        let itemsArray = [[], [], []];
+        let count = 0;
+        let type = "x";
+
+        document.querySelector(".playerturn").innerHTML =   "Oynama sırası: " + type;
+
+        document.querySelectorAll('.xox-box').forEach(x => {
+            x.addEventListener("click", onBoxClick);
+            x.addEventListener("contextmenu", onBoxClick)
+        });
+
+        document.querySelector('.new-game').onclick = () => {
+            itemsArray = [[], [], []];
+            count = 0;
+            type = "x";
+            document.querySelector('.result').innerHTML = "";
+            document.querySelectorAll('.item').forEach(x => {
+                x.remove();
+            });
+            document.querySelector(".playerturn").innerHTML =   "Oynama sırası: " + type;
+        };
+
+        function onBoxClick(e) {
+            e.preventDefault();
+            const current = e.target;
+            const parent = current.parentElement;
+
+            if (current.childElementCount > 0 || count == 9 || !current.classList.contains('xox-box'))
+                return;
+
+
+            count++;
+            const item = document.createElement("div");
+            item.classList.add("item");
+            current.appendChild(item);
+
+            const parentIndex = Array.from(parent.parentElement.children).indexOf(parent);
+            const index = Array.from(parent.children).indexOf(current);
+            itemsArray[parentIndex][index] = type;
+
+            switch (type) {
+                case "x":
+                    item.innerHTML = "X";
+                    item.classList.add("item-x");
+                    break;
+                case "o":
+                    item.innerHTML = "O";
+                    item.classList.add("item-o");
+                    break;
+            }
+
+            let col = 0, row = 0;
+            for (let i = 0; i < 3; i++) {
+                if (itemsArray[parentIndex][i] == type)
+                    col++;
+                if (itemsArray[i][index] == type)
+                    row++;
+            }
+
+            if (!(col == 3 || row == 3)) {
+                if (itemsArray[1][1] == type) {
+                    if (parentIndex == 0 && index == 2 && itemsArray[2][0] == type)
+                        return finishGame(1);
+                    if (parentIndex == 0 && index == 0 && itemsArray[2][2] == type)
+                        return finishGame(1);
+                    if (parentIndex == 1 && index == 1 && itemsArray[2][2] == type && itemsArray[0][0])
+                        return finishGame(1);
+                    if (parentIndex == 2 && index == 0 && itemsArray[0][2] == type)
+                        return finishGame(1);
+                    if (parentIndex == 2 && index == 2 && itemsArray[0][0] == type)
+                        return finishGame(1);
+                }
+
+                if (count == 9)
+                    return finishGame(0);
+            }
+            else {
+                return finishGame(1);
+            }
+
+            type = type == "x" ? "o" : "x";
+            document.querySelector(".playerturn").innerHTML =   "Oynama sırası: " + type;
+
+            function finishGame(state) {
+                isFinished = true;
+                if (state == 1) {
+                    count = 9;
+                    document.querySelector('.result').innerHTML = type + " oyunu kazandı.";
+                    console.log(type + " oyunu kazandı.");
+                }
+                else {
+                    console.log("Oyunu kimse kazanamadı");
+                    document.querySelector('.result').innerHTML = "Oyunu kimse kazanamadı.";
+                }
+            }
+
+        }
+    </script>
+</body>
+
+</html>
